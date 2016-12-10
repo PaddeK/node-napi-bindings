@@ -1,0 +1,53 @@
+{
+    "name": "napi-bindings",
+    "description": "Nymi API bindings to work with Nymi SDK 4.x",
+    "version": "0.1.0",
+    "license": "Apache-2.0",
+    "keywords": ["napi", "nymi", "nymi api", "nymi bindings"],
+    "dependencies": {
+        "ffi": "^2.2.0",
+        "ref-struct": "^1.1.0"
+    },
+    "repository" : {
+        "type" : "git",
+        "url" : "https://github.com/npm/npm.git"
+    },
+    "os" : [ "win32" ],
+    "scripts": {
+        "postinstall": "node-gyp clean"
+    },
+    "engines" : {
+        "node" : ">=6.9.1"
+    },
+    "main": "src/index",
+    "jshintConfig": {
+        "bitwise": false,
+        "camelcase": true,
+        "curly": true,
+        "eqeqeq": true,
+        "forin": true,
+        "immed": true,
+        "latedef": true,
+        "newcap": true,
+        "noarg": true,
+        "noempty": true,
+        "nonew": true,
+        "quotmark": "single",
+        "undef": true,
+        "unused": true,
+        "strict": true,
+        "maxlen": 120,
+        "boss": true,
+        "globalstrict": true,
+        "laxcomma": true,
+        "regexp": true,
+        "indent": 4,
+        "onecase": true,
+        "devel": true,
+        "node": true,
+        "nonstandard": true,
+        "nomen": false,
+        "onevar": true,
+        "esversion": 6
+    }
+}
