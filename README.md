@@ -34,7 +34,7 @@ const napi = require('napi-bindings');
 try {
     let init, put, get;
 
-    init = napi.jsonNapiConfigureD('.', 0, 9088, '127.0.0.1');
+    init = napi.jsonNapiConfigureD('.', napi.LogLevel.NORMAL, 9088, '127.0.0.1');
 
     console.assert(init === napi.ConfigOutcome.OKAY, 'INIT: %s', Object.keys(napi.ConfigOutcome)[init]);
 
