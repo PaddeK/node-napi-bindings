@@ -39,6 +39,8 @@ const   FFI = require('ffi'),
 module.exports = new FFI.Library(path.resolve(__dirname, '../bin/napi'), {
     jsonNapiConfigureD: ['int', ['string', 'int', 'int', 'string']],
     jsonNapiGetD: [NapiReturn, []],
+    jsonNapiGetSD: [NapiReturn, ['bool', 'int']],
+    jsonNapiGetTSD: [NapiReturn, ['int', 'int']],
     jsonNapiPutD: ['int', ['string']],
     jsonNapiTerminateD: ['void', []]
 }, {
