@@ -36,16 +36,22 @@ const   FFI = require('ffi'),
             IMPOSSIBLE: 5
         };
 
-module.exports = new FFI.Library(path.resolve(__dirname, '../bin/napi'), {
-    jsonNapiConfigureD: ['int', ['string', 'int', 'int', 'string']],
-    jsonNapiGetD: [NapiReturn, []],
-    jsonNapiGetSD: [NapiReturn, ['bool', 'int']],
-    jsonNapiGetTSD: [NapiReturn, ['int', 'int']],
-    jsonNapiPutD: ['int', ['string']],
-    jsonNapiTerminateD: ['void', []]
-}, {
-    LogLevel: LogLevel,
-    ConfigOutcome: ConfigOutcome,
-    JsonGetOutcome: JsonGetOutcome,
-    JsonPutOutcome: JsonPutOutcome
-});
+module.exports = function (nymulator) {
+    let lib = !!nymulator || false;
+
+    lib = process.platform === 'darwin' && lib ? '../bin/napi-net' : '../bin/napi';
+
+    return new FFI.Library(path.resolve(__dirname, lib), {
+        jsonNapiConfigureD: ['int', ['string', 'int', 'int', 'string']],
+        jsonNapiGetD: [NapiReturn, []],
+        jsonNapiGetSD: [NapiReturn, ['bool', 'int']],
+        jsonNapiGetTSD: [NapiReturn, ['int', 'int']],
+        jsonNapiPutD: ['int', ['string']],
+        jsonNapiTerminateD: ['void', []]
+    }, {
+        LogLevel: LogLevel,
+        ConfigOutcome: ConfigOutcome,
+        JsonGetOutcome: JsonGetOutcome,
+        JsonPutOutcome: JsonPutOutcome
+    });
+};

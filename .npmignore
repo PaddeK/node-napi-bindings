@@ -50,3 +50,6 @@ xcuserdata/
 /config/provisions.json
 /config/ncl.log
 /config/json-napi.log
+/tests/json-napi.log
+/tests/ncl.log
+/tests/provisions.json
