@@ -36,6 +36,11 @@ const   FFI = require('ffi'),
             IMPOSSIBLE: 5
         };
 
+/**
+ *
+ * @param nymulator boolean using nymulator (true) or physical Nymi Band (false) [default: false]
+ * @returns {*}
+ */
 module.exports = function (nymulator) {
     let lib = !!nymulator || false;
 
