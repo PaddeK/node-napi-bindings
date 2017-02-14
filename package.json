@@ -10,9 +10,6 @@
         "nymi bindings"
     ],
     "dependencies": {
-        "ffi": "^2.2.0",
-        "nodeunit": "^0.11.0",
-        "ref-struct": "^1.1.0"
     },
     "repository": {
         "type": "git",
