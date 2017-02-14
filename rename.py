@@ -6,4 +6,4 @@ files.extend(glob.glob(sys.argv[1] + os.path.sep + 'mac_*.dylib'))
 for file in files:
     #os.rename(file, sys.argv[1] + os.path.sep + format(file.rsplit('_')[1]))
     print(file)
-    print(format(file.rsplit('_', 1)[1]))
+    print(sys.argv[1] + os.path.sep + format(file.rsplit('_', 1)[1]))
