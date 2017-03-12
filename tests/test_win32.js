@@ -1,17 +1,44 @@
 'use strict';
 
-exports.testNymulatorOnWin = function (test) {
-    let napi = require('../src/index.js')(true),
-        init = napi.jsonNapiConfigureD(__dirname + '/not-existent', napi.LogLevel.NORMAL, 9088, '127.0.0.1');
+const NapiBinding = require('../src/index');
 
-    test.ok(init === 2);
+
+exports.testNymulatorOnWin = function (test) {
+    let napi = new NapiBinding(true),
+        init = napi.jsonNapiConfigureD(__dirname + '/not-existent', NapiBinding.LogLevel.NORMAL, 9088, '127.0.0.1');
+
+    napi.jsonNapiTerminateD();
+
+    test.ok(init === NapiBinding.ConfigOutcome.CONFIGURATION_FILE_NOT_FOUND);
     test.done();
 };
 
-exports.testNoNymulatorOnWin = function (test) {
-    let napi = require('../src/index.js')(false),
-        init = napi.jsonNapiConfigureD(__dirname + '/not-existent', napi.LogLevel.NORMAL, 9089, '127.0.0.1');
+exports.testIgnoreNymulatorFlagOnWin = function (test) {
+    let napi = new NapiBinding(false),
+        init = napi.jsonNapiConfigureD(__dirname + '/not-existent', NapiBinding.LogLevel.NORMAL, 9088, '127.0.0.1');
 
-    test.ok(init === 2);
+    napi.jsonNapiTerminateD();
+
+    test.ok(init === NapiBinding.ConfigOutcome.CONFIGURATION_FILE_NOT_FOUND);
+    test.done();
+};
+
+exports.testNativeOnWin = function (test) {
+    let napi = new NapiBinding(false),
+        init = napi.jsonNapiConfigureD(__dirname, NapiBinding.LogLevel.NORMAL, 9089, '127.0.0.1');
+
+    napi.jsonNapiTerminateD();
+
+    test.ok(init === NapiBinding.ConfigOutcome.OKAY);
+    test.done();
+};
+
+exports.testNativeByPortOnWin = function (test) {
+    let napi = new NapiBinding(true),
+        init = napi.jsonNapiConfigureD(__dirname, NapiBinding.LogLevel.NORMAL, 9089, '127.0.0.1');
+
+    napi.jsonNapiTerminateD();
+
+    test.ok(init === NapiBinding.ConfigOutcome.OKAY);
     test.done();
 };
