@@ -1,7 +1,7 @@
 {
     "name": "napi-bindings",
     "description": "Nymi API bindings to work with Nymi SDK 4.x",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "license": "Apache-2.0",
     "keywords": [
         "napi",
@@ -11,8 +11,10 @@
     ],
     "dependencies": {
         "ffi": "^2.2.0",
-        "nodeunit": "^0.11.0",
         "ref-struct": "^1.1.0"
+    },
+    "devDependencies": {
+        "nodeunit": "^0.11.0"
     },
     "repository": {
         "type": "git",
