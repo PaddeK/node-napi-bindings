@@ -1,97 +1,99 @@
 'use strict';
 
-const   FFI = require('ffi'),
-        Struct = require('ref-struct'),
-        path = require('path'),
-        /**
-         *  @typedef LogLevel
-         *  @type {object}
-         *  @property {int} NORMAL   Limited logging of important events like errors and warnings. The default log level.
-         *  @property {int} INFO     Log significantly more information about the internals of NAPI.
-         *  @property {int} DEBUG    The log level that will likely be used when working with Nymi Support.
-         *  @property {int} VERBOSE  Log pretty much everything down to the Bluetooth level.
-         *  @constant
-         */
-        LogLevel = {
-            NORMAL: 0,
-            INFO: 1,
-            DEBUG: 2,
-            VEBOSE: 3
-        },
-        /**
-         *  @typedef ConfigOutcome
-         *  @type {object}
-         *  @property {int} OKAY                             Configured successfully.
-         *  @property {int} FAILED_TO_INIT                   Configuration infomation is okay, but unable to start successfully.
-         *  @property {int} CONFIGURATION_FILE_NOT_FOUND     The provided configuration file could not be found.
-         *  @property {int} CONFIGURATION_FILE_NOT_READABLE  The provided configuration file could not be read.
-         *  @property {int} CONFIGURATION_FILE_NOT_PARSED    The provided configuration file was not valid JSON.
-         *  @property {int} IMPOSSIBLE
-         *  @constant
-         */
-        ConfigOutcome = {
-            OKAY: 0,
-            FAILED_TO_INIT: 1,
-            CONFIGURATION_FILE_NOT_FOUND: 2,
-            CONFIGURATION_FILE_NOT_READABLE: 3,
-            CONFIGURATION_FILE_NOT_PARSED: 4,
-            IMPOSSIBLE: 5
-        },
-        /**
-         *  @typedef JsonPutOutcome
-         *  @type {object}
-         *  @property {int} OKAY                 Sending JSON was successful.
-         *  @property {int} NAPI_NOT_RUNNING     NAPI is not running – either jsonNapiConfigure did not complete or jsonNapiTerminate was already called.
-         *  @property {int} IMPOSSIBLE
-         *  @constant
-         */
-        JsonPutOutcome = {
-            OKAY: 0,
-            NAPI_NOT_RUNNING: 1,
-            IMPOSSIBLE: 2
-        },
-        /**
-         *  @typedef JsonGetOutcome
-         *  @type {object}
-         *  @property {int} OKAY                 A JSON string has been returned.
-         *  @property {int} NAPI_NOT_RUNNING     NAPI is not running – either jsonNapiConfigure did not complete or jsonNapiTerminate was already called.
-         *  @property {int} TIMED_OUT            The second variant of jsonNapiGet timed out.
-         *  @property {int} QUIT_SIGNALED        The third variant of jsonNapiGet was called and quit was signaled.
-         *  @property {int} NAPI_FINISHED        jsonNapiTerminate was called.
-         *  @property {int} IMPOSSIBLE
-         *  @constant
-         */
-        JsonGetOutcome = {
-            OKAY: 0,
-            NAPI_NOT_RUNNING: 1,
-            TIMED_OUT: 2,
-            QUIT_SIGNALED: 3,
-            NAPI_FINISHED: 4,
-            IMPOSSIBLE: 5
-        },
-        /**
-         * @typedef JsonNapiResponse
-         * @type {object}
-         * @property {string} message           Contains reesponse from NAPI as stringified JSON.
-         * @property {JsonGetOutcome} outcome   Return code of the call to jsonGetD, jsonGetSD or jsonGetTSD.
-         * @property {boolean} quit             TRUE if jsonGetSD returned due to quit beeing triggered, FALSE otherwise.
-         * @constant
-         */
-        JsonNapiResponse = new Struct({
-            message: 'string',
-            outcome: 'int',
-            quit: 'bool'
-        }),
-        NapiInterface = {
-            jsonNapiConfigureD: ['int', ['string', 'int', 'int', 'string']],
-            jsonNapiGetD: [JsonNapiResponse, []],
-            jsonNapiGetSD: [JsonNapiResponse, ['bool', 'int']],
-            jsonNapiGetTSD: [JsonNapiResponse, ['int', 'int']],
-            jsonNapiPutD: ['int', ['string']],
-            jsonNapiTerminateD: ['void', []]
-        };
+const
+    FFI = require('ffi'),
+    Struct = require('ref-struct'),
+    path = require('path'),
+    /**
+     *  @typedef LogLevel
+     *  @type {object}
+     *  @property {int} NORMAL   Limited logging of important events like errors and warnings. The default log level.
+     *  @property {int} INFO     Log significantly more information about the internals of NAPI.
+     *  @property {int} DEBUG    The log level that will likely be used when working with Nymi Support.
+     *  @property {int} VERBOSE  Log pretty much everything down to the Bluetooth level.
+     *  @constant
+     */
+    LogLevel = {
+        NORMAL: 0,
+        INFO: 1,
+        DEBUG: 2,
+        VEBOSE: 3
+    },
+    /**
+     *  @typedef ConfigOutcome
+     *  @type {object}
+     *  @property {int} OKAY                             Configured successfully.
+     *  @property {int} FAILED_TO_INIT                   Configuration infomation is okay, but unable to start successfully.
+     *  @property {int} CONFIGURATION_FILE_NOT_FOUND     The provided configuration file could not be found.
+     *  @property {int} CONFIGURATION_FILE_NOT_READABLE  The provided configuration file could not be read.
+     *  @property {int} CONFIGURATION_FILE_NOT_PARSED    The provided configuration file was not valid JSON.
+     *  @property {int} IMPOSSIBLE
+     *  @constant
+     */
+    ConfigOutcome = {
+        OKAY: 0,
+        FAILED_TO_INIT: 1,
+        CONFIGURATION_FILE_NOT_FOUND: 2,
+        CONFIGURATION_FILE_NOT_READABLE: 3,
+        CONFIGURATION_FILE_NOT_PARSED: 4,
+        IMPOSSIBLE: 5
+    },
+    /**
+     *  @typedef JsonPutOutcome
+     *  @type {object}
+     *  @property {int} OKAY                 Sending JSON was successful.
+     *  @property {int} NAPI_NOT_RUNNING     NAPI is not running – either jsonNapiConfigure did not complete or jsonNapiTerminate was already called.
+     *  @property {int} IMPOSSIBLE
+     *  @constant
+     */
+    JsonPutOutcome = {
+        OKAY: 0,
+        NAPI_NOT_RUNNING: 1,
+        IMPOSSIBLE: 2
+    },
+    /**
+     *  @typedef JsonGetOutcome
+     *  @type {object}
+     *  @property {int} OKAY                 A JSON string has been returned.
+     *  @property {int} NAPI_NOT_RUNNING     NAPI is not running – either jsonNapiConfigure did not complete or jsonNapiTerminate was already called.
+     *  @property {int} TIMED_OUT            The second variant of jsonNapiGet timed out.
+     *  @property {int} QUIT_SIGNALED        The third variant of jsonNapiGet was called and quit was signaled.
+     *  @property {int} NAPI_FINISHED        jsonNapiTerminate was called.
+     *  @property {int} IMPOSSIBLE
+     *  @constant
+     */
+    JsonGetOutcome = {
+        OKAY: 0,
+        NAPI_NOT_RUNNING: 1,
+        TIMED_OUT: 2,
+        QUIT_SIGNALED: 3,
+        NAPI_FINISHED: 4,
+        IMPOSSIBLE: 5
+    },
+    /**
+     * @typedef JsonNapiResponse
+     * @type {object}
+     * @property {string} message           Contains reesponse from NAPI as stringified JSON.
+     * @property {JsonGetOutcome} outcome   Return code of the call to jsonGetD, jsonGetSD or jsonGetTSD.
+     * @property {boolean} quit             TRUE if jsonGetSD returned due to quit beeing triggered, FALSE otherwise.
+     * @constant
+     */
+    JsonNapiResponse = new Struct({
+        message: 'string',
+        outcome: 'int',
+        quit: 'bool'
+    }),
+    NapiInterface = {
+        jsonNapiConfigureD: ['int', ['string', 'int', 'int', 'string']],
+        jsonNapiGetD: [JsonNapiResponse, []],
+        jsonNapiGetSD: [JsonNapiResponse, ['bool', 'int']],
+        jsonNapiGetTSD: [JsonNapiResponse, ['int', 'int']],
+        jsonNapiPutD: ['int', ['string']],
+        jsonNapiTerminateD: ['void', []]
+    };
 
-let priv = new WeakMap(),
+let
+    priv = new WeakMap(),
     privates = {},
     _s = (scope, key, value) => { privates[key] = value; priv.set(scope, privates)},
     _g = (scope, key) => priv.get(scope)[key];

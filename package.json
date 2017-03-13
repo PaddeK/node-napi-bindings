@@ -26,6 +26,7 @@
     ],
     "scripts": {
         "postinstall": "node-gyp clean",
+        "clean": "node-gyp clean && rm -f bin/*.dylib && rm -f bin/*.dll",
         "test": "node tests/index.js"
     },
     "engines": {
