@@ -32,27 +32,31 @@ Create a file in the root directory of your project named `config.json` with the
 }
 ````
 
+## Breaking changes in 1.1.0
+To get a better usability like autocomplete i had to change some things around.
+
 ## Example
 This example will initialize the NAPI, request info about all provisioned Nymi Bands and print the result.
 The example makes the assumption you are using the Nymulator on your local machine on default port 9088.
 
 ````javascript
-const napi = require('napi-bindings')(true); // true for using Nymulator or false for using physical Nymi Band (default: false) 
+const NapiBinding = require('../src/index.js'),
+      napi = new NapiBinding(true); // true for using Nymulator or false for using physical Nymi Band (default: false)
 
 try {
     let init, put, get;
 
-    init = napi.jsonNapiConfigureD('.', napi.LogLevel.NORMAL, 9088, '127.0.0.1');
+    init = napi.jsonNapiConfigureD(__dirname, NapiBinding.LogLevel.NORMAL, 9088, '127.0.0.1');
 
-    console.assert(init === napi.ConfigOutcome.OKAY, 'INIT: %s', Object.keys(napi.ConfigOutcome)[init]);
+    console.assert(init === NapiBinding.ConfigOutcome.OKAY, 'INIT: %s', Object.keys(NapiBinding.ConfigOutcome)[init]);
 
     put = napi.jsonNapiPutD(JSON.stringify({path: 'info/get', exchange: 'provisions'}));
 
-    console.assert(put === napi.JsonPutOutcome.OKAY, 'PUT: %s', Object.keys(napi.JsonPutOutcome)[put]);
+    console.assert(put === NapiBinding.JsonPutOutcome.OKAY, 'PUT: %s', Object.keys(NapiBinding.JsonPutOutcome)[put]);
 
     get = napi.jsonNapiGetD();
 
-    console.assert(get.outcome === napi.JsonGetOutcome.OKAY, 'GET: %s', Object.keys(napi.JsonGetOutcome)[get]);
+    console.assert(get.outcome === NapiBinding.JsonGetOutcome.OKAY, 'GET: %s', Object.keys(NapiBinding.JsonGetOutcome)[get]);
 
     console.log(JSON.parse(get.message));
 } catch(err) {
