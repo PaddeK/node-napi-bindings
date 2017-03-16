@@ -9,7 +9,8 @@ exports.testNymulatorOnWin = function (test) {
 
     napi.jsonNapiTerminateD();
 
-    test.ok(init === NapiBinding.ConfigOutcome.CONFIGURATION_FILE_NOT_FOUND);
+    test.equal(init, NapiBinding.ConfigOutcome.CONFIGURATION_FILE_NOT_FOUND);
+    test.expect(1);
     test.done();
 };
 
@@ -19,7 +20,8 @@ exports.testIgnoreNymulatorFlagOnWin = function (test) {
 
     napi.jsonNapiTerminateD();
 
-    test.ok(init === NapiBinding.ConfigOutcome.CONFIGURATION_FILE_NOT_FOUND);
+    test.equal(init, NapiBinding.ConfigOutcome.CONFIGURATION_FILE_NOT_FOUND);
+    test.expect(1);
     test.done();
 };
 
@@ -29,7 +31,8 @@ exports.testNativeOnWin = function (test) {
 
     napi.jsonNapiTerminateD();
 
-    test.ok(init === NapiBinding.ConfigOutcome.OKAY);
+    test.equal(init, NapiBinding.ConfigOutcome.OKAY);
+    test.expect(1);
     test.done();
 };
 
@@ -39,6 +42,7 @@ exports.testNativeByPortOnWin = function (test) {
 
     napi.jsonNapiTerminateD();
 
-    test.ok(init === NapiBinding.ConfigOutcome.OKAY);
+    test.equal(init, NapiBinding.ConfigOutcome.OKAY);
+    test.expect(1);
     test.done();
 };
