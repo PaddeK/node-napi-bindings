@@ -33,7 +33,8 @@ Create a file in the root directory of your project named `config.json` with the
 ````
 
 ## Breaking changes in 1.1.0
-To get a better usability like autocomplete i had to change some things around.
+To get a better usability like autocomplete and JSDoc documentation 
+i had to change some things around. The example below is changed accordingly. 
 
 ## Example
 This example will initialize the NAPI, request info about all provisioned Nymi Bands and print the result.
