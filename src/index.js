@@ -17,7 +17,7 @@ const
         NORMAL: 0,
         INFO: 1,
         DEBUG: 2,
-        VEBOSE: 3
+        VERBOSE: 3
     },
     /**
      *  @typedef ConfigOutcome
