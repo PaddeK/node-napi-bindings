@@ -11,11 +11,14 @@ if (cluster.isMaster) {
     cluster.fork();
 
     cluster.on('exit', () => {
-        [__dirname + '/ncl.log', __dirname + '/json-napi.log'].forEach(file => {
+        [__dirname + '/../ncl.log', __dirname + '/../napi.log'].forEach(file => {
             return fs.existsSync(file) && fs.unlinkSync(file);
         });
     });
 } else {
+    if (process.argv.includes('functional')) {
+        return nodeunit.reporters.default.run(['tests/test_functional.js'], null, process.exit);
+    }
     nodeunit.reporters.default.run(['tests/test_' + process.platform + '.js'], null, process.exit);
 }
 

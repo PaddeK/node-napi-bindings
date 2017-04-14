@@ -22,9 +22,6 @@ Tested on Windows 7 64bit, macOS Sierra 10.12.2, macOS Sierra 10.12.3 and macOS 
 npm i napi-bindings
 ```
 
-## Prerequisite
-None so far.
-
 ## Versioning
 As of Nymi API SDK 4.1 i decided to version the bindings accordingly.
 

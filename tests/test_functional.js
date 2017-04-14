@@ -23,9 +23,9 @@ exports.testFunctional = function (test) {
         test.notEqual(get.json, '');
     } catch(err) {
         test.ok(false, err);
-    } finally {
-        napi.napiTerminate();
-        test.expect(4);
-        test.done();
     }
+
+    napi.napiTerminate();
+    test.expect(4);
+    test.done();
 };

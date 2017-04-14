@@ -25,9 +25,9 @@
         "darwin"
     ],
     "scripts": {
-        "postinstall": "node-gyp clean",
-        "clean": "node-gyp clean && rm -f bin/*.dylib && rm -f bin/*.dll",
-        "test": "node tests/index.js"
+        "postinstall": "node src/cleanup.js",
+        "test": "node tests/index.js",
+        "test-functional": "node tests/index.js functional"
     },
     "engines": {
         "node": ">=6.9.1"
