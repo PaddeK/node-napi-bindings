@@ -2,94 +2,109 @@
 
 const
     FFI = require('ffi'),
-    Struct = require('ref-struct'),
     path = require('path'),
+    ref = require('ref'),
     /**
      *  @typedef LogLevel
      *  @type {object}
-     *  @property {int} NORMAL   Limited logging of important events like errors and warnings. The default log level.
-     *  @property {int} INFO     Log significantly more information about the internals of NAPI.
+     *  @property {int} NONE     No logging.
+     *  @property {int} NORMAL   Normal logging of important events like errors and warnings. The default log level.
+     *  @property {int} INFO     Logs significantly more information about the internals of NAPI.
      *  @property {int} DEBUG    The log level that will likely be used when working with Nymi Support.
-     *  @property {int} VERBOSE  Log pretty much everything down to the Bluetooth level.
+     *  @property {int} VERBOSE  Logs pretty much everything down to the Bluetooth level.
      *  @constant
      */
     LogLevel = {
-        NORMAL: 0,
-        INFO: 1,
-        DEBUG: 2,
-        VERBOSE: 3
+        NONE: 0,
+        NORMAL: 1,
+        INFO: 2,
+        DEBUG: 3,
+        VERBOSE: 4
     },
     /**
      *  @typedef ConfigOutcome
      *  @type {object}
-     *  @property {int} OKAY                             Configured successfully.
-     *  @property {int} FAILED_TO_INIT                   Configuration infomation is okay, but unable to start successfully.
-     *  @property {int} CONFIGURATION_FILE_NOT_FOUND     The provided configuration file could not be found.
-     *  @property {int} CONFIGURATION_FILE_NOT_READABLE  The provided configuration file could not be read.
-     *  @property {int} CONFIGURATION_FILE_NOT_PARSED    The provided configuration file was not valid JSON.
+     *  @property {int} OKAY                    Configured successfully.
+     *  @property {int} INVALID_PROVISION_JSON  Provision information provided is invalid (likely invalid JSON).
+     *  @property {int} MISSING_NEA_NAME        Provision information does not include neaName.
+     *  @property {int} FAILED_TO_INIT          Configuration infomation is okay, but NAPI was unable to start successfully.
+     *  @property {int} ERROR                   An error occurred, likely an exception, possibly involving the parameters provided.
      *  @property {int} IMPOSSIBLE
      *  @constant
      */
     ConfigOutcome = {
         OKAY: 0,
-        FAILED_TO_INIT: 1,
-        CONFIGURATION_FILE_NOT_FOUND: 2,
-        CONFIGURATION_FILE_NOT_READABLE: 3,
-        CONFIGURATION_FILE_NOT_PARSED: 4,
+        INVALID_PROVISION_JSON: 1,
+        MISSING_NEA_NAME: 2,
+        FAILED_TO_INIT: 3,
+        ERROR: 4,
         IMPOSSIBLE: 5
     },
     /**
-     *  @typedef JsonPutOutcome
+     *  @typedef PutOutcome
      *  @type {object}
-     *  @property {int} OKAY                 Sending JSON was successful.
-     *  @property {int} NAPI_NOT_RUNNING     NAPI is not running – either jsonNapiConfigure did not complete or jsonNapiTerminate was already called.
+     *  @property {int} OKAY                Sending JSON was successful.
+     *  @property {int} NAPI_NOT_RUNNING    NAPI is not running – either napiConfigure did not complete or napiTerminate was already called.
+     *  @property {int} UNPARSEABLE_JSON    The provided string is not parseable as JSON.
+     *  @property {int} ERROR               An error occurred, likely an exception.
      *  @property {int} IMPOSSIBLE
      *  @constant
      */
-    JsonPutOutcome = {
+    PutOutcome = {
         OKAY: 0,
         NAPI_NOT_RUNNING: 1,
-        IMPOSSIBLE: 2
+        UNPARSEABLE_JSON: 2,
+        ERROR: 3,
+        IMPOSSIBLE: 4
     },
     /**
-     *  @typedef JsonGetOutcome
+     *  @typedef GetOutcome
      *  @type {object}
-     *  @property {int} OKAY                 A JSON string has been returned.
-     *  @property {int} NAPI_NOT_RUNNING     NAPI is not running – either jsonNapiConfigure did not complete or jsonNapiTerminate was already called.
-     *  @property {int} TIMED_OUT            The second variant of jsonNapiGet timed out.
-     *  @property {int} QUIT_SIGNALED        The third variant of jsonNapiGet was called and quit was signaled.
-     *  @property {int} NAPI_FINISHED        jsonNapiTerminate was called.
+     *  @property {int} OKAY                A JSON string has been returned.
+     *  @property {int} NAPI_NOT_RUNNING    NAPI is not running – either napiConfigure did not complete or napiTerminate was already called.
+     *  @property {int} BUFFER_TOO_SMALL    The provided char* buffer is not long enough; the length value will contain the minimum required size.
+     *  @property {int} NAPI_TERMINATED     Napi::terminate was called. This outcome will be returned once. Afterwards, the outcome is NAPI_NOT_RUNNING.
+     *  @property {int} ERROR               An error occurred, likely an exception.
      *  @property {int} IMPOSSIBLE
      *  @constant
      */
-    JsonGetOutcome = {
+    GetOutcome = {
         OKAY: 0,
         NAPI_NOT_RUNNING: 1,
-        TIMED_OUT: 2,
-        QUIT_SIGNALED: 3,
-        NAPI_FINISHED: 4,
+        BUFFER_TOO_SMALL: 2,
+        NAPI_TERMINATED: 3,
+        ERROR: 4,
         IMPOSSIBLE: 5
     },
     /**
-     * @typedef JsonNapiResponse
-     * @type {object}
-     * @property {string} message           Contains reesponse from NAPI as stringified JSON.
-     * @property {JsonGetOutcome} outcome   Return code of the call to jsonGetD, jsonGetSD or jsonGetTSD.
-     * @property {boolean} quit             TRUE if jsonGetSD returned due to quit beeing triggered, FALSE otherwise.
-     * @constant
+     *  @typedef TryGetOutcome
+     *  @type {object}
+     *  @property {int} OKAY                A JSON string has been returned.
+     *  @property {int} NOTHING             There is no JSON available at the time of the call.
+     *  @property {int} NAPI_NOT_RUNNING    NAPI is not running – either napiConfigure did not complete or napiTerminate was already called.
+     *  @property {int} BUFFER_TOO_SMALL    The provided char* buffer is not long enough; the length value will contain the minimum required size.
+     *  @property {int} NAPI_TERMINATED     Napi::terminate was called. This outcome will be returned once. Afterwards, the outcome is NAPI_NOT_RUNNING.
+     *  @property {int} ERROR               An error occurred, likely an exception.
+     *  @property {int} IMPOSSIBLE
+     *  @constant
      */
-    JsonNapiResponse = new Struct({
-        message: 'string',
-        outcome: 'int',
-        quit: 'bool'
-    }),
+    TryGetOutcome = {
+        OKAY: 0,
+        NOTHING: 1,
+        NAPI_NOT_RUNNING: 2,
+        BUFFER_TOO_SMALL: 3,
+        NAPI_TERMINATED: 4,
+        ERROR: 5,
+        IMPOSSIBLE: 6
+    },
+    stringPtr = ref.refType('string'),
+    intPtr = ref.refType('int'),
     NapiInterface = {
-        jsonNapiConfigureD: ['int', ['string', 'int', 'int', 'string']],
-        jsonNapiGetD: [JsonNapiResponse, []],
-        jsonNapiGetSD: [JsonNapiResponse, ['bool', 'int']],
-        jsonNapiGetTSD: [JsonNapiResponse, ['int', 'int']],
-        jsonNapiPutD: ['int', ['string']],
-        jsonNapiTerminateD: ['void', []]
+        napiConfigure: ['int', ['string', 'string', 'string', 'int', 'int', 'string']],
+        napiGet: ['int', [stringPtr, 'int', intPtr]],
+        napiTryGet: ['int', [stringPtr, 'int', intPtr]],
+        napiPut: ['int', ['string']],
+        napiTerminate: ['void', []]
     };
 
 let
@@ -106,25 +121,36 @@ let
 class NapiBinding
 {
     /**
-     * JsonGetOutcome
+     * GetOutcome
      *
      * @static
-     * @return {JsonGetOutcome}
+     * @return {GetOutcome}
      */
-    static get JsonGetOutcome ()
+    static get GetOutcome ()
     {
-        return JsonGetOutcome;
+        return GetOutcome;
     }
 
     /**
-     * JsonPutOutcome
+     * TryGetOutcome
      *
      * @static
-     * @return {JsonPutOutcome}
+     * @return {TryGetOutcome}
      */
-    static get JsonPutOutcome ()
+    static get TryGetOutcome ()
     {
-        return JsonPutOutcome;
+        return TryGetOutcome;
+    }
+
+    /**
+     * PutOutcome
+     *
+     * @static
+     * @return {PutOutcome}
+     */
+    static get PutOutcome ()
+    {
+        return PutOutcome;
     }
 
     /**
@@ -166,96 +192,121 @@ class NapiBinding
 
     /**
      * <p>Configure and start NAPI.</p>
-     * <p>For most NEAs the default arguments are correct so the call would be similar to jsonNapiConfigure("root-directory-path");.
+     * <p>For most NEAs the default arguments are correct so the call would be similar to napiConfigure("root-directory-path");.
      * The default host of "" is treated as "127.0.0.1". The default port of -1 will choose the port depending on platform (OS X or Windows) and libary (native or networked).
-     * The rootDirectory is a directory that must contain a file called config.json. When the NEA runs, it saves provision information into a file called provisions.json.
-     * The NEA will also create log files in that directory.</p>
+     * The value of provisions should be the same as the last saved value.
+     * </p>
      *
-     * @param {string} rootDirectory            Path to a directory that contains the config.json file and to which NAPI writes provisions.json and any log files.
+     * @param {string} neaName                  Name of this NEA (used when provisioning). (6 to 18 characters)
+     * @param {string} logDirectory             Path to a directory that will contain log files.
+     * @param {string} [provisions = '{}']      The provision data saved by previous runs of the NEA.
      * @param {int} [logLevel=LogLevel.NORMAL]  The log level to use (see LogLevel).
      * @param {int} [port=-1]                   The default port for networked Nymi Bands (on Windows) or the Nymulator.
      * @param {string} [host='']                The default host for networked Nymi Bands (on Windows) or the Nymulator.
      * @return {ConfigOutcome}
      */
-    jsonNapiConfigureD (rootDirectory, logLevel, port, host)
+    napiConfigure (neaName, logDirectory, provisions, logLevel, port, host)
     {
-        logLevel = logLevel || LogLevel.NORMAL;
-        port = port || -1;
-        host = host || '';
-        return _g(this, 'binding').jsonNapiConfigureD(rootDirectory, logLevel, port, host);
+        neaName = String(neaName);
+        logDirectory = String(logDirectory);
+        provisions = String(provisions) || '{}';
+        logLevel = ~~logLevel || LogLevel.NORMAL;
+        port = ~~port || -1;
+        host = String(host) || '';
+        return _g(this, 'binding').napiConfigure(neaName, logDirectory, provisions, logLevel, port, host);
     }
 
     /**
-     * <p>Receive a JSON message from NAPI; standard usage.</p>
-     * <p>jsonNapiGetD is a blocking call.
-     * If NAPI is not running, wait a short time and call jsonNapiGetD again. No JSON messages are lost.
+     * <p>Receive a JSON message from NAPI, blocks if nothing is available yet; standard usage.</p>
+     * <p>napiGet is a blocking call.
+     * If NAPI is not running, wait a short time and call napiGet again. No JSON messages are lost.
      * </p>
      * <b>This variant returns when:</b>
-     * <li>A message is available from NAPI (JsonGetOutcome.OKAY)</li>
-     * <li>NAPI is not running (JsonGetOutcome.NAPI_NOT_RUNNING)</li>
-     * <li>NAPI has finished (JsonGetOutcome.NAPI_FINISHED)</li>
+     * <li>A message is available from NAPI (GetOutcome.OKAY)</li>
+     * <li>A message from NAPI is ready, but the provided buffer is too small (GetOutcome::BUFFER_TOO_SMALL)</li>
+     * <li>NAPI is not running (GetOutcome.NAPI_NOT_RUNNING)</li>
+     * <li>NAPI has terminated (GetOutcome.NAPI_TERMINATED)</li>
      *
-     * @return {JsonNapiResponse}
+     * @return {{outcome: GetOutcome, json: object}}
      */
-    jsonNapiGetD ()
+    napiGet ()
     {
-        return _g(this, 'binding').jsonNapiGetD();
+        let outcome, buf, len,
+            json = null;
+
+        try {
+            buf = new Buffer(4096);
+            len = ref.alloc('int');
+            buf.type = stringPtr;
+
+            outcome = _g(this, 'binding').napiGet(buf, buf.length, len);
+
+            if (outcome === NapiBinding.GetOutcome.BUFFER_TOO_SMALL) {
+                outcome = _g(this, 'binding').napiGet(buf, len.deref(), len);
+            }
+
+            if (outcome === NapiBinding.GetOutcome.OKAY) {
+                json = JSON.parse(buf.readCString(0));
+            }
+        } catch (err) {
+            outcome = NapiBinding.GetOutcome.ERROR;
+        }
+
+        return {outcome: outcome, json: json};
     }
 
     /**
-     * <p>Receive a JSON message from NAPI; variant two.</p>
-     * <p>jsonNapiGetSD is a blocking call.
-     * If NAPI is not running, wait a short time and call jsonNapiGetSD again. No JSON messages are lost.
+     * <p>Receive a JSON message from NAPI if one is available, non-blocking; standard usage.</p>
+     * <p>napiTryGet is a non-blocking call.
+     * If NAPI is not running, wait a short time and call napiTryGet again. No JSON messages are lost.
      * </p>
      * <b>This variant returns when:</b>
-     * <li>A message is available from NAPI (JsonGetOutcome.OKAY)</li>
-     * <li>NAPI is not running (JsonGetOutcome.NAPI_NOT_RUNNING)</li>
-     * <li>NAPI has finished (JsonGetOutcome.NAPI_FINISHED)</li>
-     * <li>Quit has been signaled (JsonGetOutcome.QUIT_SIGNALED)</li>
+     * <li>A message is available from NAPI (TryGetOutcome.OKAY)</li>
+     * <li>No message is available at the time of the call. (TryGetOutcome::NOTHING)</li>
+     * <li>A message from NAPI is ready, but the provided buffer is too small (TryGetOutcome::BUFFER_TOO_SMALL)</li>
+     * <li>NAPI is not running (TryGetOutcome.NAPI_NOT_RUNNING)</li>
+     * <li>NAPI has terminated (TryGetOutcome.NAPI_TERMINATED)</li>
      *
-     * @param {boolean} quit        An bool that causes this function to return when it is set to true.
-     * @param {int} [sleep=100]     Quit is checked every sleep milliseconds.
-     * @return {JsonNapiResponse}
+     * @return {{outcome: (TryGetOutcome), json: object}}
      */
-    jsonNapiGetSD (quit, sleep)
+    napiTryGet ()
     {
-        sleep = sleep || 100;
-        return _g(this, 'binding').jsonNapiGetSD(quit, sleep);
-    }
+        let outcome, buf, len,
+            json = null;
 
-    /**
-     * <p>Receive a JSON message from NAPI; variant one.</p>
-     * <p>jsonNapiGetTSD is a blocking call.
-     * If NAPI is not running, wait a short time and call jsonNapiGetTSD again. No JSON messages are lost.
-     * </p>
-     * <b>This variant returns when:</b>
-     * <li>A message is available from NAPI (JsonGetOutcome.OKAY)</li>
-     * <li>NAPI is not running (JsonGetOutcome.NAPI_NOT_RUNNING)</li>
-     * <li>NAPI has finished (JsonGetOutcome.NAPI_FINISHED)</li>
-     * <li>A timeout has expired without a message or finish (JsonGetOutcome.TIMED_OUT)</li>
-     *
-     * @param {int} timeout      The timeout in milliseconds.
-     * @param {int} [sleep=100]  The timeout is implemented by waiting for sleep milliseconds until the timeout is exceeded.
-     * @return {JsonNapiResponse}
-     */
-    jsonNapiGetTSD (timeout, sleep)
-    {
-        sleep = sleep || 100;
-        return _g(this, 'binding').jsonNapiGetTSD(timeout, sleep);
+        try {
+            buf = new Buffer(4096);
+            len = ref.alloc('int');
+            buf.type = stringPtr;
+
+            outcome = _g(this, 'binding').napiTryGet(buf, buf.length, len);
+
+            if (outcome === NapiBinding.TryGetOutcome.BUFFER_TOO_SMALL) {
+                outcome = _g(this, 'binding').napiTryGet(buf, len.deref(), len);
+            }
+
+            if (outcome === NapiBinding.TryGetOutcome.OKAY) {
+                json = JSON.parse(buf.readCString(0));
+            }
+        } catch (err) {
+            outcome = NapiBinding.TryGetOutcome.ERROR;
+        }
+
+        return {outcome: outcome, json: json};
     }
 
     /**
      * <p>Send a JSON message to NAPI.</p>
      *
-     * @param {string} json      Stringified JSON to send to NAPI.
-     * @return {JsonPutOutcome}
+     * @param {object} json      Stringified JSON to send to NAPI.
+     * @return {PutOutcome}
      */
-    jsonNapiPutD (json)
+    napiPut (json)
     {
         try {
-            return _g(this, 'binding').jsonNapiPutD(JSON.stringify(json));
+            return _g(this, 'binding').napiPut(JSON.stringify(json));
         } catch (err) {
-            return JsonPutOutcome.IMPOSSIBLE;
+            return PutOutcome.IMPOSSIBLE;
         }
     }
 
@@ -263,14 +314,13 @@ class NapiBinding
      * <p>Shutdown NAPI.</p>
      * <p>The NEA should call this function before exiting.</p>
      * <b>Note:</b>
-     * Calling this function, followed by a second call to jsonNapiConfigD, may appear to work, but it will eventually break in unpredictable ways.
-     * A future release will support this or provide other means to achieve the same effect.
+     * Calling this function, followed by a second call to napiConfigD, may now work (consider it beta functionality).
      *
      * @return {void}
      */
-    jsonNapiTerminateD ()
+    napiTerminate ()
     {
-        _g(this, 'binding').jsonNapiTerminateD();
+        _g(this, 'binding').napiTerminate();
     }
 }
 

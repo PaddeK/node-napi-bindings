@@ -11,7 +11,7 @@ if (cluster.isMaster) {
     cluster.fork();
 
     cluster.on('exit', () => {
-        [__dirname + '/provisions.json', __dirname + '/ncl.log', __dirname + '/json-napi.log'].forEach(file => {
+        [__dirname + '/ncl.log', __dirname + '/json-napi.log'].forEach(file => {
             return fs.existsSync(file) && fs.unlinkSync(file);
         });
     });

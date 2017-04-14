@@ -1,7 +1,7 @@
 {
     "name": "napi-bindings",
     "description": "Nymi API bindings to work with Nymi SDK 4.x",
-    "version": "1.1.2",
+    "version": "4.1.0",
     "license": "Apache-2.0",
     "keywords": [
         "napi",
@@ -10,11 +10,11 @@
         "nymi bindings"
     ],
     "dependencies": {
-        "ffi": "^2.2.0",
-        "ref-struct": "^1.1.0"
+        "ffi": "~2.2.0",
+        "ref": "~1.3.4"
     },
     "devDependencies": {
-        "nodeunit": "^0.11.0"
+        "nodeunit": "~0.11.0"
     },
     "repository": {
         "type": "git",
@@ -41,50 +41,84 @@
         "root": true,
         "extends": "eslint:recommended",
         "rules": {
-            "require-jsdoc": ["error", {
-                "require": {
-                    "FunctionDeclaration": true,
-                    "MethodDefinition": true,
-                    "ClassDeclaration": false,
-                    "ArrowFunctionExpression": false
+            "require-jsdoc": [
+                "error",
+                {
+                    "require": {
+                        "FunctionDeclaration": true,
+                        "MethodDefinition": true,
+                        "ClassDeclaration": false,
+                        "ArrowFunctionExpression": false
+                    }
                 }
-            }],
-            "max-len" : ["error", {
-                "code": 120,
-                "tabWidth": 4,
-                "ignoreComments": true
-            }],
-            "valid-jsdoc": ["error", {
-                "requireReturn": true,
-                "matchDescription": ".+",
-                "requireParamDescription": false,
-                "requireReturnDescription": false
-            }],
-            "no-trailing-spaces": ["error", {
-                "skipBlankLines": false
-            }],
+            ],
+            "max-len": [
+                "error",
+                {
+                    "code": 120,
+                    "tabWidth": 4,
+                    "ignoreComments": true
+                }
+            ],
+            "valid-jsdoc": [
+                "error",
+                {
+                    "requireReturn": true,
+                    "matchDescription": ".+",
+                    "requireParamDescription": false,
+                    "requireReturnDescription": false
+                }
+            ],
+            "no-trailing-spaces": [
+                "error",
+                {
+                    "skipBlankLines": false
+                }
+            ],
             "no-bitwise": "off",
             "camelcase": "error",
             "curly": "error",
             "eqeqeq": "error",
             "guard-for-in": "error",
-            "wrap-iife": ["error", "any"],
-            "no-use-before-define": ["error", {
-                "functions": false
-            }],
+            "wrap-iife": [
+                "error",
+                "any"
+            ],
+            "no-use-before-define": [
+                "error",
+                {
+                    "functions": false
+                }
+            ],
             "new-cap": "error",
             "no-caller": "error",
             "no-empty": "error",
             "no-new": "error",
-            "quotes": ["error", "single"],
+            "quotes": [
+                "error",
+                "single"
+            ],
             "no-undef": "error",
             "no-unused-vars": "error",
-            "strict": ["error", "global"],
-            "no-cond-assign": ["error", "except-parens"],
-            "comma-style": ["error", "last"],
-            "indent": ["error", 4, {
-                "SwitchCase": 1
-            }]
+            "strict": [
+                "error",
+                "global"
+            ],
+            "no-cond-assign": [
+                "error",
+                "except-parens"
+            ],
+            "comma-style": [
+                "error",
+                "last"
+            ],
+            "indent": [
+                "error",
+                4,
+                {
+                    "SwitchCase": 1
+                }
+            ]
         }
     }
 }

@@ -2,34 +2,33 @@
 
 const NapiBinding = require('../src/index');
 
-
 exports.testNymulatorOnWin = function (test) {
     let napi = new NapiBinding(true),
-        init = napi.jsonNapiConfigureD(__dirname + '/not-existent', NapiBinding.LogLevel.NORMAL, 9088, '127.0.0.1');
+        init = napi.napiConfigure('testnea', '#', '{', NapiBinding.LogLevel.NONE, 9088, '127.0.0.1');
 
-    napi.jsonNapiTerminateD();
+    napi.napiTerminate();
 
-    test.equal(init, NapiBinding.ConfigOutcome.CONFIGURATION_FILE_NOT_FOUND);
+    test.equal(init, NapiBinding.ConfigOutcome.INVALID_PROVISION_JSON);
     test.expect(1);
     test.done();
 };
 
 exports.testIgnoreNymulatorFlagOnWin = function (test) {
     let napi = new NapiBinding(false),
-        init = napi.jsonNapiConfigureD(__dirname + '/not-existent', NapiBinding.LogLevel.NORMAL, 9088, '127.0.0.1');
+        init = napi.napiConfigure('tes', '#', '{}', NapiBinding.LogLevel.NONE, 9088, '127.0.0.1');
 
-    napi.jsonNapiTerminateD();
+    napi.napiTerminate();
 
-    test.equal(init, NapiBinding.ConfigOutcome.CONFIGURATION_FILE_NOT_FOUND);
+    test.equal(init, NapiBinding.ConfigOutcome.FAILED_TO_INIT);
     test.expect(1);
     test.done();
 };
 
 exports.testNativeOnWin = function (test) {
     let napi = new NapiBinding(false),
-        init = napi.jsonNapiConfigureD(__dirname, NapiBinding.LogLevel.NORMAL, 9089, '127.0.0.1');
+        init = napi.napiConfigure('testest', '#', '{}', NapiBinding.LogLevel.NONE, 9089, '127.0.0.1');
 
-    napi.jsonNapiTerminateD();
+    napi.napiTerminate();
 
     test.equal(init, NapiBinding.ConfigOutcome.OKAY);
     test.expect(1);
@@ -38,9 +37,9 @@ exports.testNativeOnWin = function (test) {
 
 exports.testNativeByPortOnWin = function (test) {
     let napi = new NapiBinding(true),
-        init = napi.jsonNapiConfigureD(__dirname, NapiBinding.LogLevel.NORMAL, 9089, '127.0.0.1');
+        init = napi.napiConfigure('testest', '#', '{}', NapiBinding.LogLevel.NONE, 9089, '127.0.0.1');
 
-    napi.jsonNapiTerminateD();
+    napi.napiTerminate();
 
     test.equal(init, NapiBinding.ConfigOutcome.OKAY);
     test.expect(1);
