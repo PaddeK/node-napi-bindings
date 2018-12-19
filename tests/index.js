@@ -3,6 +3,7 @@
 const
     nodeunit = require('nodeunit'),
     cluster = require('cluster'),
+    path = require('path'),
     fs = require('fs');
 
 // The NAPI created file ncl.log is locked by the process which created it, so calling unlink always throws EBUSY.
@@ -11,7 +12,7 @@ if (cluster.isMaster) {
     cluster.fork();
 
     cluster.on('exit', () => {
-        [__dirname + '/../ncl.log', __dirname + '/../napi.log'].forEach(file => {
+        [path.join(__dirname, '..', 'ncl.log'), path.join(__dirname, '..', 'napi.log')].forEach(file => {
             return fs.existsSync(file) && fs.unlinkSync(file);
         });
     });
@@ -19,6 +20,6 @@ if (cluster.isMaster) {
     if (process.argv.includes('functional')) {
         return nodeunit.reporters.default.run(['tests/test_functional.js'], null, process.exit);
     }
-    nodeunit.reporters.default.run(['tests/test_' + process.platform + '.js'], null, process.exit);
+    nodeunit.reporters.default.run([`tests/test_${process.platform}.js`], null, process.exit);
 }
 

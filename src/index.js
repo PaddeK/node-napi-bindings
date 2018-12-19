@@ -110,7 +110,7 @@ const
 let
     priv = new WeakMap(),
     privates = {},
-    _s = (scope, key, value) => { privates[key] = value; priv.set(scope, privates)},
+    _s = (scope, key, value) => {privates[key] = value; priv.set(scope, privates)},
     _g = (scope, key) => priv.get(scope)[key];
 
 /**
@@ -185,7 +185,7 @@ class NapiBinding
     {
         nymulator = nymulator || false;
 
-        let lib = process.platform === 'darwin' && nymulator ? '../bin/napi-net' : '../bin/napi';
+        let lib = process.platform === 'darwin' && nymulator ? './../bin/napi-net' : './../bin/napi';
 
         _s(this, 'binding', new FFI.Library(path.resolve(__dirname, lib), NapiInterface));
     }
@@ -235,7 +235,7 @@ class NapiBinding
             json = null;
 
         try {
-            buf = new Buffer(4096);
+            buf = Buffer.alloc(4096);
             len = ref.alloc('int');
             buf.type = stringPtr;
 
@@ -275,7 +275,7 @@ class NapiBinding
             json = null;
 
         try {
-            buf = new Buffer(4096);
+            buf = Buffer.alloc(4096);
             len = ref.alloc('int');
             buf.type = stringPtr;
 
